@@ -23,7 +23,7 @@ public class Expense {
     @Column(nullable =  false)
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 20)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
     @Column(nullable = false)
