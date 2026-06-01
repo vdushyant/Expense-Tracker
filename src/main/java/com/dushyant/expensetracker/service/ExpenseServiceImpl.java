@@ -145,6 +145,8 @@ public class ExpenseServiceImpl implements ExpenseService{
                 .amount(expense.getAmount())
                 .category(expense.getCategory())
                 .expenseDate(expense.getExpenseDate())
+                .createdAt(expense.getCreatedAt())
+                .updatedAt(expense.getUpdatedAt())
                 .build();
     }
 }

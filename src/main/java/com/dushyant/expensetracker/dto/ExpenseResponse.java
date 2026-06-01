@@ -2,6 +2,7 @@ package com.dushyant.expensetracker.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,4 +15,6 @@ public class ExpenseResponse {
     private BigDecimal amount;
     private String category;
     private LocalDate expenseDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
