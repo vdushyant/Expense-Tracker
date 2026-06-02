@@ -5,6 +5,7 @@ import com.dushyant.expensetracker.dto.ExpenseResponse;
 import com.dushyant.expensetracker.entity.Expense;
 import com.dushyant.expensetracker.exception.ResourceNotFoundException;
 import com.dushyant.expensetracker.repository.ExpenseRepository;
+import com.dushyant.expensetracker.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 
 import com.dushyant.expensetracker.dto.PagedResponse;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,15 @@ import org.springframework.data.domain.Sort;
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService{
     private final ExpenseRepository expenseRepository;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "id",
+            "description",
+            "amount",
+            "category",
+            "expenseDate",
+            "createdAt",
+            "updatedAt"
+    );
 
     @Override
     public ExpenseResponse addExpense(ExpenseRequest request){
@@ -47,6 +58,22 @@ public class ExpenseServiceImpl implements ExpenseService{
 //    }
 @Override
 public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String sortBy, String direction) {
+
+    if (page < 0) {
+        throw new BadRequestException("Page number cannot be negative");
+    }
+
+    if (size < 1 || size > 100) {
+        throw new BadRequestException("Page size must be between 1 and 100");
+    }
+
+    if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+        throw new BadRequestException("Invalid sort field: " + sortBy);
+    }
+
+    if (!direction.equalsIgnoreCase("asc") && !direction.equalsIgnoreCase("desc")) {
+        throw new BadRequestException("Sort direction must be either asc or desc");
+    }
 
     Sort sort = direction.equalsIgnoreCase("desc")
             ? Sort.by(sortBy).descending()
