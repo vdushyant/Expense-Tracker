@@ -14,6 +14,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
+import com.dushyant.expensetracker.dto.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 @Service
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService{
@@ -32,13 +38,38 @@ public class ExpenseServiceImpl implements ExpenseService{
         return mapToResponse(savedExpense);
     }
 
-    @Override
-    public List<ExpenseResponse> getAllExpense(){
-        return expenseRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
+//    @Override
+//    public List<ExpenseResponse> getAllExpense(){
+//        return expenseRepository.findAll()
+//                .stream()
+//                .map(this::mapToResponse)
+//                .toList();
+//    }
+@Override
+public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String sortBy, String direction) {
+
+    Sort sort = direction.equalsIgnoreCase("desc")
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    Page<Expense> expensePage = expenseRepository.findAll(pageable);
+
+    List<ExpenseResponse> expenses = expensePage.getContent()
+            .stream()
+            .map(this::mapToResponse)
+            .toList();
+
+    return PagedResponse.<ExpenseResponse>builder()
+            .content(expenses)
+            .pageNumber(expensePage.getNumber())
+            .pageSize(expensePage.getSize())
+            .totalElements(expensePage.getTotalElements())
+            .totalPages(expensePage.getTotalPages())
+            .last(expensePage.isLast())
+            .build();
+}
 
     @Override
     public ExpenseResponse getExpenseById(Long id){

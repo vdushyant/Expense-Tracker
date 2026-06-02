@@ -2,12 +2,15 @@ package com.dushyant.expensetracker.controller;
 
 import com.dushyant.expensetracker.dto.ExpenseRequest;
 import com.dushyant.expensetracker.dto.ExpenseResponse;
+import com.dushyant.expensetracker.dto.PagedResponse;
 import com.dushyant.expensetracker.service.ExpenseService;
 import com.dushyant.expensetracker.service.ExpenseServiceImpl;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -27,9 +30,20 @@ public class ExpenseController {
         return expenseService.addExpense(request);
     }
 
+//    @GetMapping
+//    public List<ExpenseResponse> getAllExpenses(){
+//
+//        return expenseService.getAllExpense();
+//    }
+
     @GetMapping
-    public List<ExpenseResponse> getAllExpenses(){
-        return expenseService.getAllExpense();
+    public PagedResponse<ExpenseResponse> getAllExpenses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return expenseService.getAllExpenses(page, size, sortBy, direction);
     }
 
     @GetMapping("/export")
