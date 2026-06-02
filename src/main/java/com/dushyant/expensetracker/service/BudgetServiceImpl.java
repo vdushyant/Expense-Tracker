@@ -6,6 +6,7 @@ import com.dushyant.expensetracker.entity.Expense;
 import com.dushyant.expensetracker.exception.ResourceNotFoundException;
 import com.dushyant.expensetracker.repository.BudgetRepository;
 import com.dushyant.expensetracker.repository.ExpenseRepository;
+import com.dushyant.expensetracker.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +20,22 @@ public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final ExpenseRepository expenseRepository;
+    private final CurrentUserService currentUserService;
 
     @Override
     public BudgetResponse setBudget(BudgetRequest request) {
+        User currentUser = currentUserService.getCurrentUser();
         Integer currentYear = LocalDate.now().getYear();
 
-        Budget budget = budgetRepository.findByMonthAndYear(request.getMonth(), currentYear)
+        Budget budget = budgetRepository.findByMonthAndYearAndUser(
+                        request.getMonth(),
+                        currentYear,
+                        currentUser
+                )
                 .orElse(Budget.builder()
                         .month(request.getMonth())
                         .year(currentYear)
+                        .user(currentUser)
                         .build());
 
         budget.setAmount(request.getAmount());
@@ -39,9 +47,10 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Override
     public BudgetResponse getBudgetByMonth(Integer month) {
+        User currentUser = currentUserService.getCurrentUser();
         Integer currentYear = LocalDate.now().getYear();
 
-        Budget budget = budgetRepository.findByMonthAndYear(month, currentYear)
+        Budget budget = budgetRepository.findByMonthAndYearAndUser(month, currentYear, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found for month: " + month));
 
         return mapToResponse(budget);
@@ -49,16 +58,21 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Override
     public String getBudgetStatus(Integer month) {
+        User currentUser = currentUserService.getCurrentUser();
         Integer currentYear = LocalDate.now().getYear();
 
-        Budget budget = budgetRepository.findByMonthAndYear(month, currentYear)
+        Budget budget = budgetRepository.findByMonthAndYearAndUser(month, currentYear, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found for month: " + month));
 
         YearMonth yearMonth = YearMonth.of(currentYear, month);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        BigDecimal totalExpense = expenseRepository.findByExpenseDateBetween(startDate, endDate)
+        BigDecimal totalExpense = expenseRepository.findByExpenseDateBetweenAndUser(
+                        startDate,
+                        endDate,
+                        currentUser
+                )
                 .stream()
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

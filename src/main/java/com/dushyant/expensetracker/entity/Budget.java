@@ -27,4 +27,8 @@ public class Budget {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

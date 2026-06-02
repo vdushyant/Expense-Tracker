@@ -6,6 +6,7 @@ import com.dushyant.expensetracker.entity.Expense;
 import com.dushyant.expensetracker.exception.ResourceNotFoundException;
 import com.dushyant.expensetracker.repository.ExpenseRepository;
 import com.dushyant.expensetracker.exception.BadRequestException;
+import com.dushyant.expensetracker.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,8 @@ import org.springframework.data.domain.Sort;
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService{
     private final ExpenseRepository expenseRepository;
+    private final CurrentUserService currentUserService;
+
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id",
             "description",
@@ -37,15 +40,19 @@ public class ExpenseServiceImpl implements ExpenseService{
     );
 
     @Override
-    public ExpenseResponse addExpense(ExpenseRequest request){
+    public ExpenseResponse addExpense(ExpenseRequest request) {
+        User currentUser = currentUserService.getCurrentUser();
+
         Expense expense = Expense.builder()
                 .description(request.getDescription())
                 .amount(request.getAmount())
                 .category(request.getCategory())
                 .expenseDate(request.getExpense())
+                .user(currentUser)
                 .build();
 
         Expense savedExpense = expenseRepository.save(expense);
+
         return mapToResponse(savedExpense);
     }
 
@@ -81,7 +88,8 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
 
     Pageable pageable = PageRequest.of(page, size, sort);
 
-    Page<Expense> expensePage = expenseRepository.findAll(pageable);
+    User currentUser = currentUserService.getCurrentUser();
+    Page<Expense> expensePage = expenseRepository.findByUser(currentUser, pageable);
 
     List<ExpenseResponse> expenses = expensePage.getContent()
             .stream()
@@ -100,16 +108,18 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
 
     @Override
     public ExpenseResponse getExpenseById(Long id){
-        Expense expense = expenseRepository.findById(id).orElseThrow(()
-                ->new ResourceNotFoundException("Expense not found with id: "+id));
+        User currentUser = currentUserService.getCurrentUser();
+        Expense expense = expenseRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 
         return mapToResponse(expense);
     }
 
     @Override
     public ExpenseResponse updateExpense(Long id, ExpenseRequest request){
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Expense not found with id: "+id));
+        User currentUser = currentUserService.getCurrentUser();
+        Expense expense = expenseRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 
         expense.setDescription(request.getDescription());
         expense.setAmount(request.getAmount());
@@ -122,15 +132,18 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
 
     @Override
     public void deleteExpense(Long id) {
-        Expense expense = expenseRepository.findById(id)
+        User currentUser = currentUserService.getCurrentUser();
+        Expense expense = expenseRepository.findByIdAndUser(id, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 
+        expenseRepository.delete(expense);
         expenseRepository.delete(expense);
     }
 
     @Override
     public List<ExpenseResponse> getExpensesByCategory(String category) {
-        return expenseRepository.findByCategoryIgnoreCase(category)
+        User currentUser = currentUserService.getCurrentUser();
+        return expenseRepository.findByCategoryIgnoreCaseAndUser(category, currentUser)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -138,11 +151,11 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
 
     @Override
     public String getTotalSummary() {
-        BigDecimal total = expenseRepository.findAll()
+        User currentUser = currentUserService.getCurrentUser();
+        BigDecimal total = expenseRepository.findByUser(currentUser)
                 .stream()
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         return "Total expenses: ₹" + total;
     }
 
@@ -154,7 +167,8 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        BigDecimal total = expenseRepository.findByExpenseDateBetween(startDate, endDate)
+        User currentUser = currentUserService.getCurrentUser();
+        BigDecimal total = expenseRepository.findByExpenseDateBetweenAndUser(startDate, endDate, currentUser)
                 .stream()
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -164,7 +178,8 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
 
     @Override
     public byte[] exportExpensesToCsv() {
-        List<Expense> expenses = expenseRepository.findAll();
+        User currentUser = currentUserService.getCurrentUser();
+        List<Expense> expenses = expenseRepository.findByUser(currentUser);
 
         StringBuilder csv = new StringBuilder();
 
