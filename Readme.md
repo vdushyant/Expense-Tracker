@@ -15,6 +15,9 @@ A Spring Boot backend application for tracking expenses, managing monthly budget
 - Request validation
 - Global exception handling
 - Audit fields: `createdAt` and `updatedAt`
+- Authorization: Bearer <token>(For Protected API's)
+- User-specific expenses and budgets
+- Swagger Authorize button usage
 
 ## Tech Stack
 
@@ -22,20 +25,25 @@ A Spring Boot backend application for tracking expenses, managing monthly budget
 - Spring Boot
 - Spring Web
 - Spring Data JPA
+- Spring JWT
+- Spring Security
 - PostgreSQL
 - Hibernate
 - Lombok
 - Maven
 - Postman
+- Swagger
 
 ## Project Structure
 
 ```text
 src/main/java/com/dushyant/expensetracker
+├── config
 ├── controller
 ├── dto
 ├── entity
 ├── exception
 ├── repository
+├── security
 ├── service
 └── ExpenseTrackerApplication.java
