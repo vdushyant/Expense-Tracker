@@ -1,0 +1,10 @@
+.idea/
+*.iml
+
+.git/
+.gitignore
+
+README.md
+postman/
+*.log
+.env

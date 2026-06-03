@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: expense-tracker-db
+    environment:
+      POSTGRES_DB: expense_tracker
+      POSTGRES_USER: Dushyant
+      POSTGRES_PASSWORD: Saurabh@7
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: expense-tracker-app
+    depends_on:
+      - postgres
+    environment:
+      DB_USERNAME: Dushyant
+      DB_PASSWORD: Saurabh@7
+      JWT_SECRET: your_super_long_secret_key_for_expense_tracker_backend_123456789
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/expense_tracker
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
