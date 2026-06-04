@@ -33,6 +33,7 @@ A Spring Boot backend application for tracking expenses, managing monthly budget
 - Maven
 - Postman
 - Swagger
+- Docker
 
 ## Project Structure
 
@@ -47,3 +48,12 @@ src/main/java/com/dushyant/expensetracker
 ├── security
 ├── service
 └── ExpenseTrackerApplication.java
+
+## Run with Docker
+
+Make sure Docker Desktop is running.
+
+Build and start the application with PostgreSQL:
+
+```bash
+docker compose up --build
