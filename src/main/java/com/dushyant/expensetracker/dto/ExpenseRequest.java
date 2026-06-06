@@ -21,5 +21,5 @@ public class ExpenseRequest {
     private String category;
 
     @NotNull(message = "Expense Date is required")
-    private LocalDate Expense;
+    private LocalDate expenseDate;
 }

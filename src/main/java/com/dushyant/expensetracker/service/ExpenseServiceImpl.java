@@ -47,7 +47,7 @@ public class ExpenseServiceImpl implements ExpenseService{
                 .description(request.getDescription())
                 .amount(request.getAmount())
                 .category(request.getCategory())
-                .expenseDate(request.getExpense())
+                .expenseDate(request.getExpenseDate())
                 .user(currentUser)
                 .build();
 
@@ -124,7 +124,7 @@ public PagedResponse<ExpenseResponse> getAllExpenses(int page, int size, String 
         expense.setDescription(request.getDescription());
         expense.setAmount(request.getAmount());
         expense.setCategory(request.getCategory());
-        expense.setExpenseDate(request.getExpense());
+        expense.setExpenseDate(request.getExpenseDate());
 
         Expense updatedExpense  = expenseRepository.save(expense);
         return mapToResponse(updatedExpense);
