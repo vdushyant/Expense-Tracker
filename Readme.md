@@ -2,6 +2,22 @@
 
 A Spring Boot backend application for tracking expenses, managing monthly budgets, generating summaries, and exporting expense data to CSV.
 
+## Live Demo
+- Frontend: https://dss70tm98gi6z.cloudfront.net
+
+## AWS Architecture
+- Frontend: S3 + CloudFront (HTTPS)
+- Backend: EC2 (t3.micro) + CloudFront
+- Database: RDS PostgreSQL (Multi-database architecture)
+- Security: VPC Security Groups, JWT Authentication
+
+## Environment Variables
+- SPRING_DATASOURCE_URL
+- SPRING_DATASOURCE_USERNAME
+- SPRING_DATASOURCE_PASSWORD
+- JWT_SECRET
+- CORS_ALLOWED_ORIGINS
+
 ## Features
 
 - Add, update, delete, and view expenses
@@ -15,7 +31,7 @@ A Spring Boot backend application for tracking expenses, managing monthly budget
 - Request validation
 - Global exception handling
 - Audit fields: `createdAt` and `updatedAt`
-- Authorization: Bearer <token>(For Protected API's)
+- Authorization Token(JWT): Bearer <token>(For Protected API's)
 - User-specific expenses and budgets
 - Swagger Authorize button usage
 
@@ -34,6 +50,10 @@ A Spring Boot backend application for tracking expenses, managing monthly budget
 - Postman
 - Swagger
 - Docker
+- Aws S3 Bucket for frontend
+- Aws Elastic Compute Cloud (EC2) for backend
+- Aws Relational Database Service (Amazon RDS) for Database Services
+- Aws Cloudfront for fast content delivery network(CDN) service that securely delivers data, API's to customers globally with low latency and high transfer speeds.
 
 ## Project Structure
 
